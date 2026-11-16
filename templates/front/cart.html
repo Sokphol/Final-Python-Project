@@ -1,0 +1,184 @@
+{% extends 'front/master.html' %}
+{% block title %}Shopping Cart | Watch Shop{% endblock %}
+{% block content %}
+    <div class="bg-slate-50 min-h-screen py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="flex items-center justify-between mb-8">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight flex items-center gap-3">
+                    <i class="bi bi-bag text-amber-500"></i> Shopping Bag
+                    {% if cart_items %}
+                    <span class="text-sm font-semibold bg-slate-200 text-slate-700 px-3 py-1 rounded-full">
+                        {{ cart_items|length }} {% if cart_items|length == 1 %}item{% else %}items{% endif %}
+                    </span>
+                    {% endif %}
+                </h1>
+
+                <a href="{{ url_for('front_bp.home') }}" class="text-xs sm:text-sm font-bold text-slate-600 hover:text-slate-950 flex items-center gap-1.5 transition-colors">
+                    <i class="bi bi-arrow-left"></i> Continue Shopping
+                </a>
+            </div>
+
+            {% if cart_items %}
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Left: Cart Items List -->
+                <div class="lg:col-span-8 bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <div class="hidden sm:grid sm:grid-cols-12 gap-4 p-5 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        <div class="col-span-6">Watch Timepiece</div>
+                        <div class="col-span-2 text-center">Unit Price</div>
+                        <div class="col-span-2 text-center">Quantity</div>
+                        <div class="col-span-2 text-right">Subtotal</div>
+                    </div>
+
+                    <div class="divide-y divide-slate-100">
+                        {% for item in cart_items %}
+                        <div class="p-5 sm:p-6 grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                            
+                            <!-- Watch thumbnail + name -->
+                            <div class="col-span-1 sm:col-span-6 flex items-center gap-4">
+                                <a href="{{ url_for('front_bp.detail', id=item.id) }}" class="w-20 h-20 bg-slate-50 rounded-2xl p-2 flex items-center justify-center border border-slate-100 flex-shrink-0 group">
+                                    {% if item.image %}
+                                    <img src="{{ item.image }}" alt="{{ item.name }}" class="w-full h-full object-contain group-hover:scale-105 transition-transform">
+                                    {% else %}
+                                    <i class="bi bi-watch text-3xl text-slate-300"></i>
+                                    {% endif %}
+                                </a>
+                                <div class="min-w-0">
+                                    <span class="text-[11px] font-bold uppercase tracking-wider text-amber-600">{{ item.category }}</span>
+                                    <h3 class="text-sm sm:text-base font-bold text-slate-900 truncate">
+                                        <a href="{{ url_for('front_bp.detail', id=item.id) }}" class="hover:text-amber-600 transition-colors">
+                                            {{ item.name }}
+                                        </a>
+                                    </h3>
+                                    <!-- Stock indicator -->
+                                    <p class="text-xs text-slate-400 mt-0.5">In stock: {{ item.stock }} available</p>
+
+                                    <!-- Remove button (Mobile) -->
+                                    <form action="{{ url_for('front_bp.cart_remove', id=item.id) }}" method="POST" class="sm:hidden mt-2">
+                                        <button type="submit" class="text-rose-600 text-xs font-semibold flex items-center gap-1">
+                                            <i class="bi bi-trash"></i> Remove
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Unit Price -->
+                            <div class="col-span-1 sm:col-span-2 flex justify-between sm:justify-center items-center">
+                                <span class="sm:hidden text-xs text-slate-400 font-semibold">Unit Price:</span>
+                                <span class="text-sm font-bold text-slate-700">${{ "%.2f"|format(item.price) }}</span>
+                            </div>
+
+                            <!-- Quantity Controls Form -->
+                            <div class="col-span-1 sm:col-span-2 flex justify-between sm:justify-center items-center">
+                                <span class="sm:hidden text-xs text-slate-400 font-semibold">Quantity:</span>
+                                <div class="flex items-center border border-slate-200 rounded-xl bg-slate-50 h-9 w-28 px-1 justify-between shadow-inner">
+                                    <!-- Decrease form -->
+                                    <form action="{{ url_for('front_bp.cart_update') }}" method="POST" class="inline">
+                                        <input type="hidden" name="product_id" value="{{ item.id }}">
+                                        <input type="hidden" name="action" value="decrease">
+                                        <button type="submit" class="w-7 h-7 flex items-center justify-center text-slate-600 hover:text-slate-950 font-bold hover:bg-white rounded-lg transition-colors">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                    </form>
+
+                                    <span class="text-xs font-black text-slate-900">{{ item.quantity }}</span>
+
+                                    <!-- Increase form -->
+                                    <form action="{{ url_for('front_bp.cart_update') }}" method="POST" class="inline">
+                                        <input type="hidden" name="product_id" value="{{ item.id }}">
+                                        <input type="hidden" name="action" value="increase">
+                                        <button type="submit" {% if item.quantity >= item.stock %}disabled{% endif %}
+                                                class="w-7 h-7 flex items-center justify-center text-slate-600 hover:text-slate-950 font-bold hover:bg-white rounded-lg transition-colors disabled:opacity-30">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Subtotal & Remove Desktop -->
+                            <div class="col-span-1 sm:col-span-2 flex justify-between sm:justify-end items-center gap-3">
+                                <span class="sm:hidden text-xs text-slate-400 font-semibold">Subtotal:</span>
+                                <span class="text-base font-black text-slate-950">${{ "%.2f"|format(item.subtotal) }}</span>
+
+                                <form action="{{ url_for('front_bp.cart_remove', id=item.id) }}" method="POST" class="hidden sm:inline">
+                                    <button type="submit" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Remove Item">
+                                        <i class="bi bi-trash text-sm"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Cart Footer Actions -->
+                    <div class="p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+                        <form action="{{ url_for('front_bp.cart_clear') }}" method="POST" onsubmit="return confirm('Clear all items from your bag?');">
+                            <button type="submit" class="text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1.5 transition-colors">
+                                <i class="bi bi-trash3"></i> Clear Shopping Bag
+                            </button>
+                        </form>
+
+                        <span class="text-xs text-slate-400">Taxes calculated at checkout</span>
+                    </div>
+                </div>
+
+                <!-- Right: Summary & Checkout Button -->
+                <div class="lg:col-span-4 bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 sm:p-8 space-y-6 sticky top-28">
+                    <h2 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Order Summary</h2>
+
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between text-slate-500">
+                            <span>Subtotal</span>
+                            <span class="font-bold text-slate-900">${{ "%.2f"|format(total_amount) }}</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500">
+                            <span>Shipping</span>
+                            <span class="font-semibold text-emerald-600">Free Insured Courier</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500">
+                            <span>Payment Method</span>
+                            <span class="font-semibold text-rose-600">KHQR / Bakong</span>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-4">
+                        <div class="flex justify-between items-baseline mb-6">
+                            <span class="text-base font-bold text-slate-900">Total Amount</span>
+                            <span class="text-2xl font-black text-slate-950">${{ "%.2f"|format(total_amount) }}</span>
+                        </div>
+
+                        <!-- Proceed to Checkout Button -->
+                        <a href="{{ url_for('front_bp.checkout') }}"
+                           class="w-full h-12 bg-slate-950 hover:bg-amber-500 hover:text-slate-950 text-white font-bold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                            <span>Proceed to Checkout</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+
+                        <div class="mt-4 flex items-center justify-center gap-2 text-xs text-slate-400">
+                            <i class="bi bi-shield-lock-fill text-emerald-500"></i>
+                            <span>Secure Checkout with Bakong KHQR</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {% else %}
+            <!-- Empty Cart State -->
+            <div class="bg-white rounded-3xl border border-slate-200 p-12 text-center max-w-xl mx-auto shadow-sm">
+                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                    <i class="bi bi-bag-x text-4xl"></i>
+                </div>
+                <h2 class="text-xl font-extrabold text-slate-900 mb-2">Your Shopping Bag is Empty</h2>
+                <p class="text-slate-500 text-sm mb-6">Explore our curated collection of exceptional timepieces and add your favorite watches to the bag.</p>
+                <a href="{{ url_for('front_bp.home') }}" class="inline-flex items-center gap-2 px-6 py-3.5 bg-slate-950 hover:bg-amber-500 hover:text-slate-950 text-white font-bold text-sm rounded-xl transition-all shadow-md">
+                    <i class="bi bi-watch"></i> Discover Watches
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+{% endblock content %}

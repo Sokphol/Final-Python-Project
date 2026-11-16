@@ -1,0 +1,171 @@
+{% extends 'admin/master.html' %} {% block content %}
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%}
+<div class="mb-4 space-y-2">
+  {% for cat, msg in messages %}
+  <div
+    class="px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-between {% if cat == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200 {% else %}bg-rose-50 text-rose-800 border border-rose-200{% endif %}"
+  >
+    <span
+      ><i
+        class="bi {% if cat == 'success' %}bi-check-circle{% else %}bi-exclamation-circle{% endif %} mr-2"
+      ></i
+      >{{ msg }}</span
+    >
+    <button
+      onclick="this.parentElement.remove()"
+      class="text-lg leading-none opacity-50 hover:opacity-100"
+    >
+      &times;
+    </button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %} {% endwith %}
+
+<div
+  class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center"
+>
+  <h1 class="text-2xl font-semibold text-slate-900">Users Management</h1>
+  <nav class="text-sm text-slate-400 mt-2 sm:mt-0">
+    <ol class="list-none p-0 inline-flex">
+      <li class="flex items-center">
+        <a
+          href="{{ url_for('admin_bp.dashboard') }}"
+          class="hover:text-brand-700 transition-colors"
+          >Home</a
+        >
+        <i class="bi bi-chevron-right mx-2 text-[10px]"></i>
+      </li>
+      <li class="text-slate-700">Users</li>
+    </ol>
+  </nav>
+</div>
+
+<div
+  class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden transition-all hover:shadow-md duration-300"
+>
+  <div
+    class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-50/50"
+  >
+    <div class="text-sm text-slate-400">
+      Total:
+      <span class="font-semibold text-slate-700">{{ users|length }}</span> users
+    </div>
+    <a
+      href="{{ url_for('admin_bp.user_add') }}"
+      class="mt-4 sm:mt-0 bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm"
+    >
+      <i class="bi bi-plus-lg mr-2"></i> Add User
+    </a>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr
+          class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100"
+        >
+          <th class="px-6 py-4 font-semibold w-12 text-center">ID</th>
+          <th class="px-6 py-4 font-semibold">User</th>
+          <th class="px-6 py-4 font-semibold">Email</th>
+          <th class="px-6 py-4 font-semibold">Phone</th>
+          <th class="px-6 py-4 font-semibold text-center">Role</th>
+          <th class="px-6 py-4 font-semibold text-center">Status</th>
+          <th class="px-6 py-4 font-semibold text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm divide-y divide-slate-100">
+        {% for u in users %}
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-6 py-4 text-center text-slate-400">#{{ u.id }}</td>
+          <td class="px-6 py-4">
+            <div class="flex items-center">
+              {% if u.profile_image %} {% set image_parts =
+              u.profile_image.rsplit('.', 1) %}
+              <img
+                src="{{ image_parts[0] }}_thumb.{{ image_parts[1] }}"
+                alt="{{ u.user_name }}"
+                class="h-9 w-9 rounded-full object-cover mr-3 shadow-xl shadow-brand-500/20 flex-shrink-0"
+              />
+              {% else %}
+              <div
+                class="h-9 w-9 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-semibold text-sm mr-3 flex-shrink-0"
+              >
+                {{ (u.user_name or 'U')[0]|upper }}
+              </div>
+              {% endif %}
+              <div>
+                <span class="font-medium text-slate-900 block"
+                  >{{ u.user_name }}</span
+                >
+                {% if u.first_name or u.last_name %}
+                <span class="text-xs text-slate-400"
+                  >{{ u.first_name or '' }} {{ u.last_name or '' }}</span
+                >
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-slate-600">{{ u.email }}</td>
+          <td class="px-6 py-4 text-slate-600">{{ u.phone or '—' }}</td>
+          <td class="px-6 py-4 text-center">
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if u.role == 'admin' %}bg-purple-100 text-purple-800 {% else %}bg-slate-100 text-slate-700{% endif %}"
+            >
+              {{ u.role or 'user' }}
+            </span>
+          </td>
+          <td class="px-6 py-4 text-center">
+            {% if u.is_active %}
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700"
+              >Active</span
+            >
+            {% else %}
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600"
+              >Inactive</span
+            >
+            {% endif %}
+          </td>
+          <td class="px-6 py-4 text-right">
+            <div class="flex items-center justify-end space-x-2">
+              <a
+                href="{{ url_for('admin_bp.user_edit', id=u.id) }}"
+                class="text-slate-400 hover:text-brand-700 p-1 rounded-md hover:bg-brand-50 transition-colors inline-block"
+                title="Edit"
+              >
+                <i class="bi bi-pencil-square text-lg"></i>
+              </a>
+              <form
+                method="POST"
+                action="{{ url_for('admin_bp.user_delete', id=u.id) }}"
+                class="inline"
+                onsubmit="return confirm('Are you sure you want to delete \'{{ u.user_name }}\'?');"
+              >
+                <button
+                  type="submit"
+                  class="text-slate-400 hover:text-rose-600 p-1 rounded-md hover:bg-rose-50 transition-colors"
+                  title="Delete"
+                >
+                  <i class="bi bi-trash text-lg"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %} {% if not users %}
+        <tr>
+          <td colspan="7" class="px-6 py-12 text-center text-slate-400">
+            <i class="bi bi-people text-4xl block mb-2"></i>
+            No users found. Add one to get started.
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

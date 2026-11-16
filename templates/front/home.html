@@ -1,0 +1,186 @@
+{% extends 'front/master.html' %}
+{% block title %}Watch Shop | Exclusive Watch Collections{% endblock %}
+{% block content %}
+
+    <!-- Watch Hero Section -->
+    <section class="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
+        <!-- Subtle background glow -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(217,119,6,0.15),transparent_50%)]"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold tracking-wider uppercase">
+                        <i class="bi bi-patch-check-fill text-amber-400"></i> New 2026 Collection
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
+                        Mastering Precision.<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500">
+                            Defining Legacy.
+                        </span>
+                    </h1>
+                    <p class="text-slate-300 text-base sm:text-lg max-w-xl font-light leading-relaxed">
+                        Discover luxury horology crafted with exceptional engineering. From legendary Swiss chronographs to advanced titanium smartwatches.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-4 pt-2">
+                        <a href="#products-section" class="px-7 py-3.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2">
+                            <span>Explore Watches</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                        <a href="{{ url_for('front_bp.home', category=1) }}" class="px-7 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-sm rounded-xl border border-white/10 transition-all backdrop-blur">
+                            Luxury Editions
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-3 gap-6 pt-6 border-t border-slate-800/80 max-w-lg">
+                        <div>
+                            <div class="text-2xl font-black text-amber-400">100%</div>
+                            <div class="text-xs text-slate-400">Authentic Certified</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-black text-amber-400">KHQR</div>
+                            <div class="text-xs text-slate-400">Instant Checkout</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-black text-amber-400">5-Year</div>
+                            <div class="text-xs text-slate-400">Global Warranty</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative w-full max-w-md aspect-square rounded-3xl bg-gradient-to-tr from-amber-500/20 to-slate-800/40 p-4 border border-amber-500/20 shadow-2xl flex items-center justify-center">
+                        <img src="{{ url_for('static', filename='image/rolex_submariner.jpg') }}" alt="Featured Watch" class="w-full h-full object-contain filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.8)] rounded-2xl">
+                        <div class="absolute -bottom-4 right-4 bg-slate-900/90 border border-slate-700/80 backdrop-blur px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-3">
+                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                            <span class="text-xs font-semibold text-slate-200">Featured: Rolex Submariner</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products-section" class="py-16 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header & Filter Bar -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-6 border-b border-slate-200">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Available Watches</h2>
+                    <p class="text-slate-500 text-sm mt-1">Browse our latest in-stock timepieces with direct KHQR checkout.</p>
+                </div>
+
+                <!-- Category Pills -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ url_for('front_bp.home') }}"
+                       class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all {% if not current_category %}bg-slate-900 text-white shadow-sm{% else %}bg-white text-slate-600 hover:bg-slate-100 border border-slate-200{% endif %}">
+                        All Timepieces
+                    </a>
+                    {% for cat in categories %}
+                    <a href="{{ url_for('front_bp.home', category=cat.id) }}"
+                       class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all {% if current_category == cat.id %}bg-slate-900 text-white shadow-sm{% else %}bg-white text-slate-600 hover:bg-slate-100 border border-slate-200{% endif %}">
+                        {{ cat.title }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {% for p in products %}
+                <div class="group bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col h-full overflow-hidden">
+                    <!-- Thumbnail Container -->
+                    <div class="relative aspect-square overflow-hidden bg-slate-100/60 p-6 flex items-center justify-center border-b border-slate-100">
+                        <a href="{{ url_for('front_bp.detail', id=p.id) }}" class="absolute inset-0 z-10" aria-label="View {{ p.name }} details"></a>
+                        
+                        {% if p.image %}
+                        <img src="{{ p.image }}" alt="{{ p.name }}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 filter drop-shadow-md">
+                        {% else %}
+                        <div class="flex flex-col items-center justify-center text-slate-300">
+                            <i class="bi bi-watch text-5xl"></i>
+                        </div>
+                        {% endif %}
+
+                        <!-- Category Badge Top-Left -->
+                        <div class="absolute top-3 left-3 z-20">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold tracking-wide uppercase bg-white/90 backdrop-blur text-slate-700 border border-slate-200 shadow-sm">
+                                {{ p.category.title if p.category else 'Watch' }}
+                            </span>
+                        </div>
+
+                        <!-- Stock Status Top-Right -->
+                        <div class="absolute top-3 right-3 z-20">
+                            {% if p.stock > 0 and p.status == 'Active' %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                In Stock ({{ p.stock }})
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                Out of Stock
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Details Body -->
+                    <div class="p-5 flex flex-col flex-grow">
+                        <!-- Product Name -->
+                        <h3 class="text-base font-bold text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-1 mb-1">
+                            <a href="{{ url_for('front_bp.detail', id=p.id) }}">
+                                {{ p.name }}
+                            </a>
+                        </h3>
+
+                        <!-- Product Description -->
+                        <p class="text-slate-500 text-xs line-clamp-2 mb-4 leading-relaxed flex-grow">
+                            {{ p.description or 'Exquisite craftsmanship with precision mechanical or quartz movement.' }}
+                        </p>
+
+                        <!-- Price and Actions -->
+                        <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3 mt-auto">
+                            <div>
+                                <span class="text-xs text-slate-400 block font-medium">Price</span>
+                                <span class="text-lg font-black text-slate-950">${{ "%.2f"|format(p.price) }}</span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <!-- View Details Action -->
+                                <a href="{{ url_for('front_bp.detail', id=p.id) }}"
+                                   class="px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-100 text-xs font-bold transition-all flex items-center gap-1"
+                                   title="View Details">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+
+                                <!-- Add to Cart Action Form -->
+                                {% if p.stock > 0 and p.status == 'Active' %}
+                                <form action="{{ url_for('front_bp.cart_add') }}" method="POST" class="inline">
+                                    <input type="hidden" name="product_id" value="{{ p.id }}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit"
+                                            class="w-9 h-9 rounded-xl bg-slate-950 hover:bg-amber-500 hover:text-slate-950 text-white flex items-center justify-center transition-all shadow-sm"
+                                            title="Add to Cart">
+                                        <i class="bi bi-bag-plus text-sm"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <button disabled class="w-9 h-9 rounded-xl bg-slate-100 text-slate-300 flex items-center justify-center cursor-not-allowed">
+                                    <i class="bi bi-bag-x text-sm"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-slate-200 p-8">
+                    <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4 text-slate-400">
+                        <i class="bi bi-watch text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">No watches found</h3>
+                    <p class="text-slate-500 text-sm mt-1">There are no timepieces in this category at the moment.</p>
+                    <a href="{{ url_for('front_bp.home') }}" class="mt-4 inline-block px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold">View All Watches</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+{% endblock content %}

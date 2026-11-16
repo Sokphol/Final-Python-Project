@@ -1,0 +1,199 @@
+{% extends 'front/master.html' %}
+{% block title %}Checkout & KHQR Payment | Watch Shop{% endblock %}
+{% block content %}
+    <div class="bg-slate-50 min-h-screen py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Back to Cart navigation -->
+            <div class="mb-6">
+                <a href="{{ url_for('front_bp.cart') }}" class="text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors inline-flex items-center gap-1.5">
+                    <i class="bi bi-arrow-left"></i> Return to Shopping Bag
+                </a>
+            </div>
+
+            <div class="mb-8">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">Checkout & KHQR Payment</h1>
+                <p class="text-slate-500 text-sm mt-1">Provide your delivery details and complete payment using Bakong / KHQR scan.</p>
+            </div>
+
+            <form action="{{ url_for('front_bp.checkout') }}" method="POST" id="checkout-form">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    <!-- Left: Customer Information Form (8 cols) -->
+                    <div class="lg:col-span-7 space-y-6">
+                        
+                        <!-- Customer Details Card -->
+                        <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 sm:p-8">
+                            <h2 class="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
+                                <i class="bi bi-person-circle text-amber-500 text-xl"></i>
+                                Guest Customer Details
+                            </h2>
+
+                            <div class="space-y-5">
+                                <!-- Full Name -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                                        Full Name <span class="text-rose-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                        <input type="text" name="full_name" required value="{{ form.get('full_name', '') }}"
+                                               placeholder="e.g. Sok Phol"
+                                               class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+                                    </div>
+                                </div>
+
+                                <!-- Email & Phone in 2 columns -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                                            Email Address <span class="text-rose-500">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                                <i class="bi bi-envelope"></i>
+                                            </div>
+                                            <input type="email" name="email" required value="{{ form.get('email', '') }}"
+                                                   placeholder="sokphol@example.com"
+                                                   class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                                            Phone Number <span class="text-rose-500">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                                <i class="bi bi-telephone"></i>
+                                            </div>
+                                            <input type="tel" name="phone" required value="{{ form.get('phone', '') }}"
+                                                   placeholder="+855 12 345 678"
+                                                   class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Shipping Address -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                                        Shipping Address <span class="text-rose-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute top-3.5 left-3.5 pointer-events-none text-slate-400">
+                                            <i class="bi bi-geo-alt"></i>
+                                        </div>
+                                        <textarea name="shipping_address" required rows="3"
+                                                  placeholder="Street address, Khan, Sangkat, City (e.g. St. 2004, Sen Sok, Phnom Penh)"
+                                                  class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all resize-none">{{ form.get('shipping_address', '') }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Purchased Items Overview -->
+                        <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 sm:p-8">
+                            <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-4">
+                                <i class="bi bi-watch text-amber-500 text-xl"></i>
+                                Items in this Order ({{ cart_items|length }})
+                            </h2>
+                            <div class="divide-y divide-slate-100">
+                                {% for item in cart_items %}
+                                <div class="py-3 flex items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 p-1 flex items-center justify-center flex-shrink-0">
+                                            {% if item.product.image %}
+                                            <img src="{{ item.product.image }}" alt="{{ item.product.name }}" class="w-full h-full object-contain">
+                                            {% else %}
+                                            <i class="bi bi-watch text-slate-300"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-bold text-slate-900 line-clamp-1">{{ item.product.name }}</div>
+                                            <div class="text-xs text-slate-400">Qty: {{ item.quantity }} &times; ${{ "%.2f"|format(item.product.price) }}</div>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-black text-slate-950">${{ "%.2f"|format(item.subtotal) }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right: KHQR Payment & Order Confirmation (5 cols) -->
+                    <div class="lg:col-span-5 space-y-6">
+                        
+                        <!-- Official Bakong / KHQR Payment Card -->
+                        <div class="bg-white rounded-3xl shadow-lg border border-slate-200/80 overflow-hidden sticky top-28">
+                            
+                            <!-- Red KHQR Header -->
+                            <div class="bg-gradient-to-r from-red-600 to-rose-700 p-5 text-white flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center font-black text-red-600 text-sm shadow">
+                                        KH
+                                    </div>
+                                    <div>
+                                        <h3 class="font-extrabold text-base tracking-wide leading-tight">KHQR</h3>
+                                        <p class="text-[10px] text-red-100 uppercase tracking-widest font-semibold">Bakong Payment</p>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 bg-red-800/60 rounded-full text-[11px] font-bold border border-red-400/30">
+                                    Official
+                                </span>
+                            </div>
+
+                            <!-- KHQR Card Body -->
+                            <div class="p-6 sm:p-8 flex flex-col items-center text-center">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Merchant</span>
+                                <h4 class="text-base font-extrabold text-slate-900 tracking-tight">WATCH SHOP CAMBODIA</h4>
+                                <span class="text-xs text-slate-500 mb-5">Account: watch_shop_kh@bakong</span>
+
+                                <!-- Dynamic QR Code Container -->
+                                <div class="p-4 bg-white rounded-2xl border-2 border-red-500 shadow-md inline-block relative mb-4">
+                                    <img src="{{ qr_image }}" alt="KHQR Payment Code" class="w-48 h-48 object-contain">
+                                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <div class="w-10 h-10 rounded-full bg-white shadow-md border border-red-200 flex items-center justify-center text-red-600 font-black text-xs">
+                                            <i class="bi bi-qr-code text-base"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Total Amount Display -->
+                                <div class="w-full bg-slate-50 rounded-2xl p-4 border border-slate-100 mb-6">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">Payable Total</span>
+                                    <div class="text-3xl font-black text-slate-950">${{ "%.2f"|format(total_amount) }} <span class="text-xs font-bold text-slate-400">USD</span></div>
+                                    <span class="text-[11px] text-emerald-600 font-semibold flex items-center justify-center gap-1 mt-1">
+                                        <i class="bi bi-check-circle-fill"></i> Zero transaction fee
+                                    </span>
+                                </div>
+
+                                <!-- Supported Apps Pill -->
+                                <div class="text-xs text-slate-500 mb-6 flex flex-wrap items-center justify-center gap-2">
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold text-[10px]">ABA Mobile</span>
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold text-[10px]">Bakong App</span>
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold text-[10px]">Canadia</span>
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold text-[10px]">Wing</span>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button type="submit"
+                                        class="w-full py-4 px-6 bg-slate-950 hover:bg-emerald-600 text-white font-extrabold text-sm rounded-xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2">
+                                    <i class="bi bi-check2-circle text-lg"></i>
+                                    <span>I Have Scanned & Completed Payment</span>
+                                </button>
+                                <p class="text-[11px] text-slate-400 mt-3">
+                                    Clicking confirms your KHQR payment and registers the order.
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

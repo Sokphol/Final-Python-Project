@@ -1,0 +1,150 @@
+{% extends 'admin/master.html' %}
+
+{% block content %}
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="mb-4 space-y-2">
+    {% for cat, msg in messages %}
+    <div class="px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-between {% if cat == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% else %}bg-rose-50 text-rose-800 border border-rose-200{% endif %}">
+      <span><i class="bi {% if cat == 'success' %}bi-check-circle{% else %}bi-exclamation-circle{% endif %} mr-2"></i>{{ msg }}</span>
+      <button onclick="this.parentElement.remove()" class="text-lg leading-none opacity-50 hover:opacity-100">&times;</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900">Customer Orders History</h1>
+    <p class="text-sm text-slate-500 mt-0.5">View and track customer orders, KHQR payment confirmations, and delivery fulfillment.</p>
+  </div>
+  <nav class="text-sm text-slate-400 mt-2 sm:mt-0">
+    <ol class="list-none p-0 inline-flex">
+      <li class="flex items-center">
+        <a href="{{ url_for('admin_bp.dashboard') }}" class="hover:text-slate-900 transition-colors">Admin</a>
+        <i class="bi bi-chevron-right mx-2 text-[10px]"></i>
+      </li>
+      <li class="text-slate-700 font-semibold">Orders</li>
+    </ol>
+  </nav>
+</div>
+
+<!-- Stats Row -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+  <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center justify-between">
+    <div>
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Orders</span>
+      <div class="text-2xl font-black text-slate-900 mt-1">{{ orders|length }}</div>
+    </div>
+    <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
+      <i class="bi bi-receipt text-xl"></i>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center justify-between">
+    <div>
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">KHQR Payments</span>
+      <div class="text-2xl font-black text-rose-600 mt-1">
+        {{ orders|selectattr('payment_status', 'equalto', 'Paid')|list|length }}
+      </div>
+    </div>
+    <div class="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
+      <i class="bi bi-qr-code text-xl"></i>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center justify-between">
+    <div>
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Revenue</span>
+      <div class="text-2xl font-black text-emerald-600 mt-1">
+        ${{ "%.2f"|format(orders|map(attribute='total_amount')|sum) }}
+      </div>
+    </div>
+    <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+      <i class="bi bi-currency-dollar text-xl"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Orders Table -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+          <th class="px-6 py-4 font-bold">Order ID</th>
+          <th class="px-6 py-4 font-bold">Customer Name</th>
+          <th class="px-6 py-4 font-bold">Phone Number</th>
+          <th class="px-6 py-4 font-bold">Total Amount</th>
+          <th class="px-6 py-4 font-bold">Order Date</th>
+          <th class="px-6 py-4 font-bold text-center">Payment Status</th>
+          <th class="px-6 py-4 font-bold text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody class="text-sm divide-y divide-slate-100">
+        {% for o in orders %}
+        <tr class="hover:bg-slate-50/80 transition-colors">
+          <!-- Order ID -->
+          <td class="px-6 py-4">
+            <span class="font-mono font-bold text-slate-900 block">{{ o.order_number }}</span>
+            <span class="text-[11px] text-slate-400">#ID {{ o.id }}</span>
+          </td>
+
+          <!-- Customer Name -->
+          <td class="px-6 py-4">
+            <div class="font-bold text-slate-900">{{ o.customer_name }}</div>
+            <div class="text-xs text-slate-400">{{ o.customer_email }}</div>
+          </td>
+
+          <!-- Phone Number -->
+          <td class="px-6 py-4 font-medium text-slate-700">
+            <a href="tel:{{ o.customer_phone }}" class="hover:underline flex items-center gap-1.5">
+              <i class="bi bi-telephone text-xs text-slate-400"></i>
+              {{ o.customer_phone }}
+            </a>
+          </td>
+
+          <!-- Total Amount -->
+          <td class="px-6 py-4 font-black text-slate-950">
+            ${{ "%.2f"|format(o.total_amount) }}
+          </td>
+
+          <!-- Order Date -->
+          <td class="px-6 py-4 text-xs text-slate-500">
+            <span class="font-medium text-slate-800 block">{{ o.created_at.strftime('%Y-%m-%d') }}</span>
+            <span>{{ o.created_at.strftime('%I:%M %p') }}</span>
+          </td>
+
+          <!-- Payment Status -->
+          <td class="px-6 py-4 text-center">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+              <i class="bi bi-qr-code text-[10px]"></i> KHQR {{ o.payment_status }}
+            </span>
+          </td>
+
+          <!-- Action: View Order Details -->
+          <td class="px-6 py-4 text-right">
+            <a href="{{ url_for('admin_bp.order_detail', id=o.id) }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-sm">
+              <i class="bi bi-eye"></i> View Details
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+
+        {% if not orders %}
+        <tr>
+          <td colspan="7" class="px-6 py-16 text-center">
+            <i class="bi bi-inbox text-5xl text-slate-300 mx-auto mb-3 block"></i>
+            <p class="text-slate-600 font-bold">No orders placed yet.</p>
+            <p class="text-slate-400 text-xs mt-1">Orders will appear here immediately after customers complete checkout with KHQR.</p>
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

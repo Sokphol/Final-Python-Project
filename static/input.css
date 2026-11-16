@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  main {
+    flex-grow: 1;
+  }
+  .glass-nav {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+  }
+  /* Previous custom styles that might be needed */
+  .hero {
+    background: url('/static/image/section.jpg') center/cover no-repeat;
+  }
+}

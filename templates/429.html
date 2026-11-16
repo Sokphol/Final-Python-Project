@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Too many requests</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+    <main class="bg-white max-w-md rounded-2xl shadow-xl p-8 text-center">
+      <p class="text-5xl font-bold">429</p>
+      <h1 class="text-2xl font-semibold mt-3">Too many requests</h1>
+      <p class="text-gray-500 mt-3">Please wait a minute and try again.</p>
+      <a
+        href="{{ url_for('front_bp.home') }}"
+        class="inline-block mt-6 bg-black text-white rounded-lg px-5 py-3"
+        >Back home</a
+      >
+    </main>
+  </body>
+</html>
