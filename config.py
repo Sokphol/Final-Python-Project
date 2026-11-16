@@ -1,4 +1,5 @@
 import os
+import shutil
 from dotenv import load_dotenv
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ArgumentError
@@ -8,19 +9,34 @@ load_dotenv()
 
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+    SECRET_KEY = os.getenv("SECRET_KEY", "watch-shop-secret-key-2026")
 
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     DATABASE_URL = os.getenv("DATABASE_URL", "").strip().strip('"').strip("'")
 
     if DATABASE_URL:
+        # Normalize postgres:// to postgresql:// for SQLAlchemy
+        if DATABASE_URL.startswith("postgres://"):
+            DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
         try:
             make_url(DATABASE_URL)
             SQLALCHEMY_DATABASE_URI = DATABASE_URL
         except ArgumentError:
             SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "flask_db.sqlite")
     else:
-        SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "flask_db.sqlite")
+        # Vercel serverless environment handling:
+        # Vercel filesystem is read-only except /tmp
+        if os.getenv("VERCEL"):
+            tmp_db = "/tmp/flask_db.sqlite"
+            orig_db = os.path.join(BASE_DIR, "flask_db.sqlite")
+            if not os.path.exists(tmp_db) and os.path.exists(orig_db):
+                try:
+                    shutil.copy2(orig_db, tmp_db)
+                except Exception:
+                    pass
+            SQLALCHEMY_DATABASE_URI = f"sqlite:///{tmp_db}"
+        else:
+            SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "flask_db.sqlite")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TEMPLATES_AUTO_RELOAD = True

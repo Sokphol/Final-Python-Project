@@ -9,3 +9,5 @@ __pycache__/
 node_modules/
 .idea/
 .pytest_cache/
+
+.vercel
