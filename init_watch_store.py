@@ -85,7 +85,7 @@ def init_db():
                     "name": "TAG Heuer Carrera Chronograph",
                     "price": 5450.00,
                     "description": "A prestigious motor-racing chronograph with signature glassbox curved sapphire crystal, deep blue sunray dial, and in-house Calibre TH20-00 automatic movement.",
-                    "image": "/static/image/rolex_submariner.jpg",
+                    "image": "/static/image/tag_heuer_carrera.jpg",
                     "stock": 6,
                     "status": "Active",
                     "rating": 4.9,
