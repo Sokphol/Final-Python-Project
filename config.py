@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 from dotenv import load_dotenv
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ArgumentError
@@ -22,26 +23,27 @@ class Config:
             make_url(DATABASE_URL)
             SQLALCHEMY_DATABASE_URI = DATABASE_URL
         except ArgumentError:
-            SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "flask_db.sqlite")
+            SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "flask_db.sqlite").replace('\\', '/')
     else:
-        # Vercel serverless environment handling:
-        # Vercel filesystem is read-only except /tmp
-        if os.getenv("VERCEL"):
-            tmp_db = "/tmp/flask_db.sqlite"
+        # In serverless environments (e.g. Vercel), /var/task is read-only.
+        # We copy or create the SQLite database in the system temp directory.
+        if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+            tmp_dir = tempfile.gettempdir()
+            tmp_db = os.path.join(tmp_dir, "flask_db.sqlite")
             orig_db = os.path.join(BASE_DIR, "flask_db.sqlite")
-            if not os.path.exists(tmp_db) and os.path.exists(orig_db):
+            if os.path.exists(orig_db) and not os.path.exists(tmp_db):
                 try:
                     shutil.copy2(orig_db, tmp_db)
                 except Exception:
                     pass
-            SQLALCHEMY_DATABASE_URI = f"sqlite:///{tmp_db}"
+            SQLALCHEMY_DATABASE_URI = "sqlite:///" + tmp_db.replace('\\', '/')
         else:
-            SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "flask_db.sqlite")
+            SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "flask_db.sqlite").replace('\\', '/')
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     TEMPLATES_AUTO_RELOAD = True
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024
-    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
+    UPLOAD_FOLDER = os.path.join(tempfile.gettempdir() if os.getenv("VERCEL") else BASE_DIR, 'static', 'uploads')
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     PERMANENT_SESSION_LIFETIME = 1800
 

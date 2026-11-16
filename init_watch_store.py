@@ -11,22 +11,7 @@ def init_db():
         # 1. Create any missing tables
         db.create_all()
 
-        # 2. Check columns on product table
-        conn = sqlite3.connect('flask_db.sqlite')
-        cursor = conn.cursor()
-        cursor.execute("PRAGMA table_info(product)")
-        cols = [row[1] for row in cursor.fetchall()]
-
-        if 'stock' not in cols:
-            cursor.execute("ALTER TABLE product ADD COLUMN stock INTEGER NOT NULL DEFAULT 10")
-            print("Added stock column")
-        if 'status' not in cols:
-            cursor.execute("ALTER TABLE product ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'Active'")
-            print("Added status column")
-        conn.commit()
-        conn.close()
-
-        # 3. Ensure Admin User
+        # 2. Ensure Admin User
         admin_user = User.query.filter_by(role='admin').first()
         if not admin_user:
             admin_user = User(

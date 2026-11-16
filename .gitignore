@@ -5,9 +5,7 @@
 .env
 __pycache__/
 *.pyc
-*.sqlite
 node_modules/
 .idea/
 .pytest_cache/
-
 .vercel
